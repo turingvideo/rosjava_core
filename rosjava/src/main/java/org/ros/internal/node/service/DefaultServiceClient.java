@@ -175,6 +175,6 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
   @Override
   public boolean isConnected() {
-    return tcpClient.getChannel().isConnected();
+    return tcpClient != null && tcpClient.getChannel().isConnected();
   }
 }
