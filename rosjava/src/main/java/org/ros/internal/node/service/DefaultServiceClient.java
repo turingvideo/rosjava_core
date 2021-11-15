@@ -104,7 +104,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
         messageFactory, executorService);
   }
 
-  private DefaultServiceClient(final GraphName nodeName,
+  public DefaultServiceClient(final GraphName nodeName,
       final ServiceDeclaration serviceDeclaration, final MessageSerializer<T> serializer,
       final MessageDeserializer<S> deserializer, final MessageFactory messageFactory,
       final ScheduledExecutorService executorService) {
@@ -112,7 +112,7 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     this.serializer = serializer;
     this.messageFactory = messageFactory;
     messageBufferPool = new MessageBufferPool();
-    responseListeners = Lists.newLinkedList();
+    responseListeners = createResponseListenersQueue();
     connectionHeader = new ConnectionHeader();
     connectionHeader.addField(ConnectionHeaderFields.CALLER_ID, nodeName.toString());
     // TODO(damonkohler): Support non-persistent connections.
@@ -125,6 +125,10 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     handshakeLatch = new HandshakeLatch();
     serviceClientHandshakeHandler.addListener(handshakeLatch);
     tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
+  }
+
+  protected Queue<ServiceResponseListener<S>> createResponseListenersQueue() {
+    return Lists.newLinkedList();
   }
 
   @Override

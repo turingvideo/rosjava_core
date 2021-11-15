@@ -136,7 +136,7 @@ public class ServiceFactory {
         }
       }
       serviceClient =
-          DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
+              onCreateClient(nodeName, serviceDeclaration, serializer, deserializer,
               messageFactory, executorService);
       serviceManager.addClient(serviceClient);
       createdNewClient = true;
@@ -146,5 +146,13 @@ public class ServiceFactory {
       serviceClient.connect(serviceDeclaration.getUri());
     }
     return serviceClient;
+  }
+
+  protected <T, S> DefaultServiceClient<T, S> onCreateClient(final GraphName nodeName,
+                                                             final ServiceDeclaration serviceDeclaration, final MessageSerializer<T> serializer,
+                                                             final MessageDeserializer<S> deserializer, final MessageFactory messageFactory,
+                                                             final ScheduledExecutorService executorService) {
+    return DefaultServiceClient.newDefault(nodeName, serviceDeclaration, serializer, deserializer,
+            messageFactory, executorService);
   }
 }
