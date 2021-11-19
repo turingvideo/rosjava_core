@@ -133,6 +133,8 @@ public class ServiceFactory {
         serviceClient = (DefaultServiceClient<T, S>) serviceManager.getClient(name);
         if (serviceClient.isConnected()) {
           return serviceClient;
+        } else {
+          serviceManager.removeClient(serviceClient);
         }
       }
       serviceClient =
