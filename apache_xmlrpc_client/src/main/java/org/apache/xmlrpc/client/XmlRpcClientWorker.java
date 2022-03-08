@@ -91,4 +91,8 @@ public class XmlRpcClientWorker implements XmlRpcWorker {
 		};
 		newThread(runnable).start();
 	}
+
+	public XmlRpcClientWorkerFactory getFactory() {
+		return factory;
+	}
 }
