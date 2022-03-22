@@ -39,8 +39,8 @@ abstract class Client<T extends XmlRpcEndpoint> {
 
   // TODO(damonkohler): This should be pulled out into a user configurable
   // strategy.
-  protected static final int CONNECTION_TIMEOUT = 10 * 1000; // 60 seconds
-  protected static final int REPLY_TIMEOUT = 10 * 1000; // 60 seconds
+  protected static final int CONNECTION_TIMEOUT = 10 * 1000; // 10 seconds
+  protected static final int REPLY_TIMEOUT = 10 * 1000; // 10 seconds
   protected static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
 
   private final URI uri;
