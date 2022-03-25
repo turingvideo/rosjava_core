@@ -39,9 +39,9 @@ abstract class Client<T extends XmlRpcEndpoint> {
 
   // TODO(damonkohler): This should be pulled out into a user configurable
   // strategy.
-  private static final int CONNECTION_TIMEOUT = 60 * 1000; // 60 seconds
-  private static final int REPLY_TIMEOUT = 60 * 1000; // 60 seconds
-  private static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
+  protected static final int CONNECTION_TIMEOUT = 10 * 1000; // 10 seconds
+  protected static final int REPLY_TIMEOUT = 10 * 1000; // 10 seconds
+  protected static final int XMLRPC_TIMEOUT = 10 * 1000; // 10 seconds
 
   private final URI uri;
 
@@ -57,22 +57,26 @@ abstract class Client<T extends XmlRpcEndpoint> {
     this.uri = uri;
     XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
     try {
-      config.setServerURL(uri.toURL());
+      config.setServerURL(getRemoteUri().toURL());
     } catch (MalformedURLException e) {
       throw new RosRuntimeException(e);
     }
     config.setConnectionTimeout(CONNECTION_TIMEOUT);
     config.setReplyTimeout(REPLY_TIMEOUT);
 
-    XmlRpcClient client = new XmlRpcClient();
+    XmlRpcClient client = createXmlRpcClient();
     client.setTransportFactory(new XmlRpcCommonsTransportFactory(client));
     client.setConfig(config);
 
     XmlRpcClientFactory<T> factory = new XmlRpcClientFactory<T>(client);
-    xmlRpcEndpoint =
-        interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, "",
+    xmlRpcEndpoint = interfaceClass.cast(factory.newInstance(getClass().getClassLoader(), interfaceClass, "",
             XMLRPC_TIMEOUT));
   }
+
+  protected XmlRpcClient createXmlRpcClient() {
+    return new XmlRpcClient();
+  }
+
 
   /**
    * @return the {@link URI} of the remote {@link XmlRpcServer}
