@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
 
-  private final class HandshakeLatch implements ClientHandshakeListener {
+  private static final class HandshakeLatch implements ClientHandshakeListener {
 
     private CountDownLatch latch;
     private boolean success;
@@ -92,7 +92,8 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
   private final Queue<ServiceResponseListener<S>> responseListeners;
   private final ConnectionHeader connectionHeader;
   private final TcpClientManager tcpClientManager;
-  private final HandshakeLatch handshakeLatch;
+  private final ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler;
+  private boolean triedConnect = false;
 
   private TcpClient tcpClient;
 
@@ -119,11 +120,8 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     connectionHeader.addField(ConnectionHeaderFields.PERSISTENT, "1");
     connectionHeader.merge(serviceDeclaration.toConnectionHeader());
     tcpClientManager = new TcpClientManager(executorService);
-    final ServiceClientHandshakeHandler<T, S> serviceClientHandshakeHandler =
-        new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
+    serviceClientHandshakeHandler = new ServiceClientHandshakeHandler<T, S>(connectionHeader, responseListeners, deserializer,
             executorService);
-    handshakeLatch = new HandshakeLatch();
-    serviceClientHandshakeHandler.addListener(handshakeLatch);
     tcpClientManager.addNamedChannelHandler(serviceClientHandshakeHandler);
   }
 
@@ -136,15 +134,26 @@ public class DefaultServiceClient<T, S> implements ServiceClient<T, S> {
     Preconditions.checkNotNull(uri, "URI must be specified.");
     Preconditions.checkArgument(uri.getScheme().equals("rosrpc"), "Invalid service URI.");
     Preconditions.checkState(tcpClient == null, "Already connected.");
-    final InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
-    handshakeLatch.reset();
-    tcpClient = tcpClientManager.connect(toString(), address);
+    synchronized (this) {
+      Preconditions.checkState(!triedConnect, "Already called connect.");
+      triedConnect = true;
+    }
     try {
-      if (!handshakeLatch.await(1, TimeUnit.SECONDS)) {
-        throw new RosRuntimeException(handshakeLatch.getErrorMessage());
+      HandshakeLatch handshakeLatch = new HandshakeLatch();
+      serviceClientHandshakeHandler.addListener(handshakeLatch);
+
+      final InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
+      handshakeLatch.reset();
+      tcpClient = tcpClientManager.connect(toString(), address);
+      try {
+        if (!handshakeLatch.await(1, TimeUnit.SECONDS)) {
+          throw new RosRuntimeException(handshakeLatch.getErrorMessage());
+        }
+      } catch (final InterruptedException e) {
+        throw new RosRuntimeException("Handshake timed out.");
       }
-    } catch (final InterruptedException e) {
-      throw new RosRuntimeException("Handshake timed out.");
+    } finally {
+      serviceClientHandshakeHandler.shutdown();
     }
   }
 
