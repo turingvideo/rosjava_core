@@ -145,7 +145,12 @@ public class ServiceFactory {
     }
 
     if (createdNewClient) {
-      serviceClient.connect(serviceDeclaration.getUri());
+      try {
+        serviceClient.connect(serviceDeclaration.getUri());
+      } catch (Exception e) {
+        serviceClient.shutdown();
+        throw e;
+      }
     }
     return serviceClient;
   }
