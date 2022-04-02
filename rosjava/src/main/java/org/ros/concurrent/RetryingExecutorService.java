@@ -89,6 +89,7 @@ public class RetryingExecutorService {
         }, retryDelay, retryTimeUnit);
       } else {
         latch.countDown();
+        latches.remove(callable);
       }
     }
   }
