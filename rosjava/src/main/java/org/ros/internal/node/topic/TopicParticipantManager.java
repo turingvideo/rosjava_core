@@ -126,7 +126,7 @@ public class TopicParticipantManager {
     subscriberConnections.remove(subscriber, publisherIdentifier);
   }
 
-  public void removeSubscriberConnection(DefaultSubscriber<?> subscriber) {
+  public void removeSubscriberAllConnections(DefaultSubscriber<?> subscriber) {
     subscriberConnections.removeAll(subscriber);
   }
 
@@ -140,7 +140,7 @@ public class TopicParticipantManager {
     publisherConnections.remove(publisher, subscriberIdentifier);
   }
 
-  public void removePublisherConnection(DefaultPublisher<?> publisher) {
+  public void removePublisherAllConnections(DefaultPublisher<?> publisher) {
     publisherConnections.removeAll(publisher);
   }
 

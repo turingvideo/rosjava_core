@@ -78,7 +78,7 @@ public class SubscriberFactory {
 
           @Override
           public void onShutdown(Subscriber<T> subscriber) {
-            topicParticipantManager.removeSubscriberConnection((DefaultSubscriber<T>) subscriber);
+            topicParticipantManager.removeSubscriberAllConnections((DefaultSubscriber<T>) subscriber);
             topicParticipantManager.removeSubscriber((DefaultSubscriber<T>) subscriber);
           }
         });
