@@ -126,6 +126,10 @@ public class TopicParticipantManager {
     subscriberConnections.remove(subscriber, publisherIdentifier);
   }
 
+  public void removeSubscriberAllConnections(DefaultSubscriber<?> subscriber) {
+    subscriberConnections.removeAll(subscriber);
+  }
+
   public void addPublisherConnection(DefaultPublisher<?> publisher,
       SubscriberIdentifier subscriberIdentifier) {
     publisherConnections.put(publisher, subscriberIdentifier);
@@ -134,6 +138,10 @@ public class TopicParticipantManager {
   public void removePublisherConnection(DefaultPublisher<?> publisher,
       SubscriberIdentifier subscriberIdentifier) {
     publisherConnections.remove(publisher, subscriberIdentifier);
+  }
+
+  public void removePublisherAllConnections(DefaultPublisher<?> publisher) {
+    publisherConnections.removeAll(publisher);
   }
 
   public void shutdown(){
